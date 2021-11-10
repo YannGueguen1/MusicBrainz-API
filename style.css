@@ -1,0 +1,19 @@
+body{
+    background-color: lightcyan;
+}
+
+.main-list {
+  width: 600px;
+  /* list-style-type: none; */
+}
+
+.person-list {
+  padding-left: 20px;
+  border: 1px black solid;
+  border-radius: 20px;
+  margin-bottom: 5px;
+}
+
+.person-name{
+    font-weight: bold;
+}

@@ -3,7 +3,7 @@ const Pagination = ({ items, pageSize, onPageChange }) => {
   if (items.length <= 1) return null;
 
   let num = Math.ceil(items.length / pageSize);
-  let pages = range(1, num + 1);
+  let pages = range(1, num);
   const list = pages.map(page => {
     return (
       <Button key={page} onClick={onPageChange} className="page-item">
@@ -43,7 +43,7 @@ const useDataApi = (initialUrl, initialData) => {
       dispatch({ type: "FETCH_INIT" });
       try {
         const result = await axios(url);
-        console.log(result)
+        console.log(result.data.artists)
         if (!didCancel) {
           dispatch({ type: "FETCH_SUCCESS", payload: result.data });
         }
@@ -87,12 +87,13 @@ const dataFetchReducer = (state, action) => {
 };
 // App that gets data from Hacker News url
 function App() {
+  const startName="jackson"
   const { Fragment, useState, useEffect, useReducer } = React;
-  const [query, setQuery] = useState("jackson");
+  const [query, setQuery] = useState(startName);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = 8;
   const [{ data, isLoading, isError }, doFetch] = useDataApi(
-    "https://musicbrainz.org/ws/2/artist/?query=jackson&fmt=json",
+    `https://musicbrainz.org/ws/2/artist/?query=${startName}&fmt=json`,
     {
       artists: []
     }
@@ -103,13 +104,13 @@ function App() {
   let page = data.artists;
   if (page.length >= 1) {
     page = paginate(page, currentPage, pageSize);
-    console.log(`currentPage: ${currentPage}`);
+    // console.log(`currentPage: ${currentPage}`);
   }
   return (
     <Fragment>
       <form
         onSubmit={event => {
-          doFetch("https://musicbrainz.org/ws/2/artist/?query=${query}&fmt=json");
+          doFetch(`https://musicbrainz.org/ws/2/artist/?query=${query}&fmt=json`);
           event.preventDefault();
         }}
       >
@@ -126,16 +127,16 @@ function App() {
       {isLoading ? (
         <div>Loading ...</div>
       ) : (
-        <ul>
+        <ol className="main-list">
           {page.map(item => (
-            // <li key={item.objectID}>
-            //   <a href={item.url}>{item.title}</a>
-            // </li>
-            <li key={item.id}>
-              <div>{item.name}</div>
+            <li key={item.id} className="person-list">
+              <div><span className="person-name">{item.name}</span><span>{item.hasOwnProperty('aliases') && false ? ", a.k.a " + item.aliases[0].name : ""}</span></div>
+              <div>Person or group: {item.type}</div>
+              <div>Birth: {item["life-span"].begin}{item.hasOwnProperty('begin-area') && item.hasOwnProperty('country') ? ` in ${item["begin-area"].name}, ${item.country}` : ""}</div>
+              <div>Death: {item["life-span"].ended==true && item.type=="Person" ? item["life-span"].end : "-"}</div>
             </li>
           ))}
-        </ul>
+        </ol>
       )}
       <Pagination
         items={data.artists}
